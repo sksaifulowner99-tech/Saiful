@@ -1,0 +1,334 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotex AI Cyber-Bot Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            height: 100%;
+            background-color: #02050a;
+            color: #00ff41;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background: #0a0f18; padding: 20px; text-align: center;
+            border-bottom: 2px solid #00ff41; box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+
+        header h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; text-shadow: 0 0 10px #00ff41; }
+
+        .controls-area { padding: 25px 20px; display: flex; flex-direction: column; gap: 15px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 11px; color: #00ff41; font-weight: bold; text-transform: uppercase; }
+
+        .custom-dropdown-btn, .num-input, .toggle-btn {
+            width: 100%; padding: 15px; background: #0a0f18;
+            border: 1px solid #00ff41; color: #00ff41; border-radius: 6px;
+            font-size: 14px; text-align: center; cursor: pointer;
+            height: 55px; display: flex; align-items: center; justify-content: center;
+            outline: none;
+        }
+
+        .time-box-red { border: 1px solid #ff3131 !important; padding: 15px; border-radius: 8px; background: rgba(255, 49, 49, 0.05); }
+        .time-box-red label { color: #ff3131; }
+        .time-selectors { display: flex; gap: 8px; justify-content: center; align-items: center; }
+        .time-input-field { background: #0a0f18; border: 1px solid #ff3131; color: #ff3131; padding: 10px; border-radius: 5px; width: 65px; text-align: center; outline: none; font-weight: bold; }
+        .ampm-btn { background: #0a0f18; border: 1px solid #ff3131; color: #ff3131; padding: 10px; border-radius: 5px; width: 70px; cursor: pointer; font-weight: bold; }
+
+        #loadingArea {
+            display: none; text-align: center; padding: 25px; margin: 20px 0;
+            background: rgba(0, 255, 65, 0.03); border: 2px solid #00ff41;
+            border-radius: 12px; position: relative; overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.2), 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        #loadingArea::before {
+            content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(transparent, rgba(0, 255, 65, 0.1), transparent);
+            animation: scan 2s infinite linear;
+        }
+
+        @keyframes scan { 0% { top: -100%; } 100% { top: 100%; } }
+
+        .hack-text { font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #00ff41; margin-bottom: 15px; text-transform: uppercase; text-shadow: 0 0 8px #00ff41; }
+        #timer { font-size: 45px; color: #fff; font-family: 'Orbitron'; text-shadow: 0 0 15px #fff; display: block; }
+
+        .generate-btn {
+            background: transparent; color: #00ff41; padding: 18px;
+            font-weight: bold; border: 2px solid #00ff41; border-radius: 6px;
+            font-family: 'Orbitron'; text-transform: uppercase; margin-top: 10px; cursor: pointer;
+        }
+        .generate-btn:active { background: #00ff41; color: #000; }
+
+        .results-area { padding: 20px; display: none; background: #02050a; margin-top: 30px; padding-bottom: 50px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { color: #00ff41; font-size: 12px; padding: 12px; border-bottom: 2px solid #00ff41; text-align: left; text-transform: uppercase; }
+        td { padding: 15px 12px; border-bottom: 1px solid rgba(0, 255, 65, 0.1); font-size: 14px; color: #fff; }
+        .call-text { color: #00ff41; font-weight: bold; }
+        .put-text { color: #ff3131; font-weight: bold; }
+
+        .copy-container { display: flex; justify-content: center; padding-bottom: 50px; }
+        .copy-btn {
+            background: #00ff41; color: #000; 
+            padding: 15px 40px; font-weight: bold; border: none; border-radius: 8px;
+            font-family: 'Orbitron'; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.6); font-size: 14px;
+        }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 1000; backdrop-filter: blur(8px);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #02050a; border: 2px solid #00ff41; width: 90%; max-height: 80%;
+            overflow-y: auto; border-radius: 10px; padding: 10px; box-shadow: 0 0 40px rgba(0, 255, 65, 0.4);
+        }
+        .modal-category-title {
+            background: rgba(0, 255, 65, 0.1); color: #fff; padding: 10px; 
+            font-size: 12px; font-weight: bold; text-align: left; 
+            border-left: 4px solid #00ff41; margin: 15px 0 5px 0; text-transform: uppercase;
+        }
+        .modal-item { padding: 18px; border-bottom: 1px solid rgba(0, 255, 65, 0.1); color: #00ff41; text-align: center; font-size: 15px; cursor: pointer; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<header><h1>SYSTEM_OVERRIDE_AI</h1></header>
+
+<div class="controls-area">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="input-group">
+            <label>> SIGNAL MODE</label>
+            <div class="toggle-btn" id="mktToggle" onclick="toggleMkt()">MKT: OFF</div>
+        </div>
+        <div class="input-group">
+            <label>> SIGNAL TYPE</label>
+            <div class="custom-dropdown-btn" id="typeBtn" onclick="openModal('type')">ALL</div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="input-group">
+            <label>> ASSET</label>
+            <div class="custom-dropdown-btn" id="assetBtn" onclick="openModal('asset')">EUR/USD</div>
+        </div>
+        <div class="input-group">
+            <label>> SERVER</label>
+            <div class="custom-dropdown-btn" id="serverBtn" onclick="openModal('server')">API</div>
+        </div>
+    </div>
+
+    <div class="input-group time-box-red">
+        <label>> START TIME (HH : MM)</label>
+        <div class="time-selectors">
+            <input type="number" id="startHr" class="time-input-field" value="10">
+            <span style="color:#ff3131; font-weight: bold;">:</span>
+            <input type="number" id="startMin" class="time-input-field" value="00">
+            <button id="ampmBtn" class="ampm-btn" onclick="toggleAMPM('start')">AM</button>
+        </div>
+    </div>
+
+    <div class="input-group time-box-red">
+        <label>> END TIME (HH : MM)</label>
+        <div class="time-selectors">
+            <input type="number" id="endHr" class="time-input-field" value="11">
+            <span style="color:#ff3131; font-weight: bold;">:</span>
+            <input type="number" id="endMin" class="time-input-field" value="00">
+            <button id="endAmpmBtn" class="ampm-btn" onclick="toggleAMPM('end')">AM</button>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>> SIGNAL COUNT</label>
+        <input type="number" id="qty" class="num-input" value="10">
+    </div>
+
+    <div class="input-group">
+        <label>> TIMEZONE</label>
+        <div class="custom-dropdown-btn" id="tzBtn" onclick="openModal('tz')">(UTC+06:00)</div>
+    </div>
+
+    <div id="loadingArea">
+        <div class="hack-text">QUOTEX API HACK PROCESSING</div>
+        <div id="timer">60</div>
+    </div>
+
+    <button class="generate-btn" id="execBtn" onclick="startProcess()">Execute</button>
+</div>
+
+<div class="results-area" id="resultsSection">
+    <table>
+        <thead><tr><th>TIME</th><th>ASSET</th><th>SIGNAL</th></tr></thead>
+        <tbody id="display"></tbody>
+    </table>
+    
+    <div class="copy-container">
+        <button class="copy-btn" id="copyBtn" onclick="copySignals()">Copy All Signals</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-content" id="modalContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+    let isAllMkt = false;
+    let startAMPM = "AM";
+    let endAMPM = "AM";
+    
+    const otcMarkets = ["USD/BRL (OTC)", "GBP/NZD (OTC)", "USD/EGP (OTC)", "USD/PHP (OTC)", "USD/COP (OTC)", "USD/ZAR (OTC)", "NZD/CHF (OTC)", "USD/MXN (OTC)", "CAD/CHF (OTC)", "EUR/NZD (OTC)", "USD/DZD (OTC)", "AUD/NZD (OTC)", "USD/ARS (OTC)", "NZD/CAD (OTC)", "NZD/JPY (OTC)", "USD/BDT (OTC)", "USD/INR (OTC)", "USD/NGN (OTC)", "USD/PKR (OTC)"];
+    const realMarkets = ["EUR/USD", "EUR/GBP", "EUR/JPY", "GBP/USD", "USD/JPY", "AUD/CAD", "CAD/JPY", "GBP/AUD", "AUD/JPY", "AUD/USD", "EUR/CHF", "CHF/JPY", "GBP/CHF", "GBP/JPY", "EUR/AUD", "EUR/CAD", "USD/CAD", "GBP/CAD", "USD/CHF"];
+    const timezones = ["(UTC+06:00)", "(UTC-11:00)", "(UTC-10:00)", "(UTC-09:30)", "(UTC-09:00)", "(UTC-08:00)", "(UTC-07:00)", "(UTC-05:00)", "(UTC-04:00)", "(UTC-03:30)", "(UTC-03:00)", "(UTC-02:00)", "(UTC+03:00)", "(UTC+03:30)", "(UTC+04:00)", "(UTC+04:30)", "(UTC+05:00)", "(UTC+05:30)", "(UTC+05:45)", "(UTC+06:30)", "(UTC+07:00)", "(UTC+08:00)", "(UTC+08:45)", "(UTC+09:00)", "(UTC+09:30)", "(UTC+10:00)", "(UTC+10:30)", "(UTC+11:00)", "(UTC+12:00)", "(UTC+13:00)", "(UTC+13:45)", "(UTC+14:00)"];
+
+    function toggleMkt() {
+        isAllMkt = !isAllMkt;
+        document.getElementById('mktToggle').innerText = isAllMkt ? "MKT: ACTIVE" : "MKT: OFF";
+        document.getElementById('assetBtn').style.opacity = isAllMkt ? "0.3" : "1";
+    }
+
+    function toggleAMPM(type) {
+        if(type === 'start') {
+            startAMPM = startAMPM === "AM" ? "PM" : "AM";
+            document.getElementById('ampmBtn').innerText = startAMPM;
+        } else {
+            endAMPM = endAMPM === "AM" ? "PM" : "AM";
+            document.getElementById('endAmpmBtn').innerText = endAMPM;
+        }
+    }
+
+    function openModal(type) {
+        const overlay = document.getElementById('modalOverlay');
+        const content = document.getElementById('modalContent');
+        content.innerHTML = "";
+        if(type === 'asset' && !isAllMkt) {
+            let realTitle = document.createElement('div'); realTitle.className = "modal-category-title"; realTitle.innerText = "-- Real Markets"; content.appendChild(realTitle);
+            realMarkets.forEach(item => createModalItem(item, 'asset', content));
+            let otcTitle = document.createElement('div'); otcTitle.className = "modal-category-title"; otcTitle.innerText = "-- OTC Markets"; content.appendChild(otcTitle);
+            otcMarkets.forEach(item => createModalItem(item, 'asset', content));
+        } else {
+            let list = (type === 'tz') ? timezones : (type === 'type' ? ["ALL", "CALL", "PUT"] : ["API", "NOT API"]);
+            list.forEach(item => createModalItem(item, type, content));
+        }
+        overlay.style.display = "flex";
+    }
+
+    function createModalItem(item, type, container) {
+        let div = document.createElement('div'); div.className = "modal-item"; div.innerText = item;
+        div.onclick = () => {
+            if(type==='asset') document.getElementById('assetBtn').innerText = item;
+            if(type==='tz') document.getElementById('tzBtn').innerText = item;
+            if(type==='type') document.getElementById('typeBtn').innerText = item;
+            if(type==='server') document.getElementById('serverBtn').innerText = item;
+            closeModal();
+        };
+        container.appendChild(div);
+    }
+
+    function closeModal() { document.getElementById('modalOverlay').style.display = "none"; }
+
+    function startProcess() {
+        document.getElementById('loadingArea').style.display = "block";
+        document.getElementById('execBtn').disabled = true;
+        let time = 60;
+        const timer = setInterval(() => {
+            time--; document.getElementById('timer').innerText = time;
+            if(time <= 0) { 
+                clearInterval(timer); 
+                document.getElementById('loadingArea').style.display = "none"; 
+                document.getElementById('execBtn').disabled = false; 
+                generate(); 
+            }
+        }, 1000);
+    }
+
+    function generate() {
+        const resultsArea = document.getElementById('resultsSection');
+        const display = document.getElementById('display');
+        resultsArea.style.display = "block";
+        display.innerHTML = "";
+        
+        let sH = parseInt(document.getElementById('startHr').value);
+        let sM = parseInt(document.getElementById('startMin').value) || 0;
+        let eH = parseInt(document.getElementById('endHr').value);
+        let eM = parseInt(document.getElementById('endMin').value) || 0;
+        let maxQty = parseInt(document.getElementById('qty').value) || 10;
+        
+        function to24(h, m, ampm) {
+            if(ampm === "PM" && h < 12) h += 12;
+            if(ampm === "AM" && h === 12) h = 0;
+            return h * 60 + m;
+        }
+
+        let startT = to24(sH, sM, startAMPM);
+        let endT = to24(eH, eM, endAMPM);
+        
+        if (endT <= startT) endT += 1440; // overnight adjustment
+
+        let totalDuration = endT - startT;
+        // সময়ের গ্যাপ নির্ণয়: শেষ সিগন্যাল যেন ঠিক End Time এ পড়ে
+        let timeGap = (maxQty > 1) ? totalDuration / (maxQty - 1) : 0;
+
+        let selectedAsset = document.getElementById('assetBtn').innerText;
+        let sigType = document.getElementById('typeBtn').innerText;
+        let pool = otcMarkets.includes(selectedAsset) ? otcMarkets : realMarkets;
+
+        for (let i = 0; i < maxQty; i++) {
+            let currentT = Math.round(startT + (i * timeGap));
+            let h24 = (Math.floor(currentT / 60)) % 24;
+            let m24 = currentT % 60;
+            let h12 = h24 % 12 || 12;
+            let ampm = h24 >= 12 ? "PM" : "AM";
+            let timeStr = `${h12.toString().padStart(2,'0')}:${m24.toString().padStart(2,'0')} ${ampm}`;
+
+            let asset = isAllMkt ? pool[Math.floor(Math.random()*pool.length)] : selectedAsset;
+            let isCall = sigType === "ALL" ? Math.random() > 0.5 : sigType === "CALL";
+            let signalDisplay = isCall ? 'CALL' : 'PUT';
+            let signalClass = isCall ? 'call-text' : 'put-text';
+            
+            display.innerHTML += `<tr><td>${timeStr}</td><td>${asset}</td><td><span class="${signalClass}">➪ ${signalDisplay}</span></td></tr>`;
+        }
+
+        // Automatic Scroll down
+        setTimeout(() => {
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+    }
+
+    function copySignals() {
+        const rows = document.querySelectorAll('#display tr');
+        let textToCopy = "🚀 SYSTEM OVERRIDE AI SIGNALS 🚀\n\n";
+        
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            if(cols.length >= 3) {
+                textToCopy += `${cols[0].innerText} | ${cols[1].innerText} | ${cols[2].innerText}\n`;
+            }
+        });
+        textToCopy += "\n⚠️ Accuracy 100% | Use 1-Step MTG!";
+
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            document.getElementById('copyBtn').innerText = "COPIED SUCCESSFULLY!";
+            setTimeout(() => { document.getElementById('copyBtn').innerText = "COPY ALL SIGNALS"; }, 2000);
+        } catch (err) {
+            alert("Copy failed, please copy manually.");
+        }
+        document.body.removeChild(textArea);
+    }
+</script>
+</body>
+</html>
